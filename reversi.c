@@ -9,7 +9,9 @@
 
 char board[FRAME][FRAME];
 char turnFlg;
-
+int vec_row[] = {-1, -1, -1, 0, 1, 1, 1, 0};
+int vec_col[] = {-1, 0, 1, 1, 1, 0, -1, -1};
+  
 void init() {
   int i, j;
   for(i = 0; i < FRAME; i++) {
@@ -49,9 +51,7 @@ void viewBoard() {
 }
 
 int isPutStone(int row, int col) {
-  int vec_row[] = {-1, -1, -1, 0, 1, 1, 1, 0};
-  int vec_col[] = {-1, 0, 1, 1, 1, 0, -1, -1};
-  int vec, i;
+  int vec;
   int flg = FALSE;
   int vrow, vcol;
   if(row < 0 || col < 0 || row >= FRAME || col >= FRAME) return FALSE;
@@ -60,7 +60,7 @@ int isPutStone(int row, int col) {
     vrow = row;
     vcol = col;
     flg = FALSE;
-    for(i = 0; i < FRAME; i++) {
+    while(1) {
       vrow += vec_row[vec];
       vcol += vec_col[vec];
       if(board[vrow][vcol] == BLANK)  break;
@@ -71,9 +71,45 @@ int isPutStone(int row, int col) {
       if(flg) {
         return TRUE;
       }
+      break;
     }
   }
   return FALSE;
+}
+
+void flip(int row, int col) {
+  int vec;
+  int flg = FALSE;
+  int vrow, vcol;
+  for(vec = 0; vec < 8; vec++) {
+    vrow = row;
+    vcol = col;
+    flg = FALSE;
+    while(1) {
+      vrow += vec_row[vec];
+      vcol += vec_col[vec];
+      if(board[vrow][vcol] == BLANK)  break;
+      if(board[vrow][vcol] == ((turnFlg == BLACK) ? WHITE : BLACK)) {
+        flg = TRUE;
+        continue;
+      }
+      if(flg) {
+        board[row][col] = (turnFlg == BLACK) ? BLACK : WHITE;
+        vrow = row;
+        vcol = col; 
+        while(1) {
+          vrow += vec_row[vec];
+          vcol += vec_col[vec];
+          if(board[vrow][vcol] != ((turnFlg == BLACK) ? BLACK : WHITE)) {
+            board[vrow][vcol] = (turnFlg == BLACK) ? BLACK : WHITE; 
+          } else {
+            break;
+          }
+        }
+      }
+      break;
+    }
+  }
 }
 
 int main() {
@@ -93,7 +129,7 @@ int main() {
       if(isPutStone(row, col)) break;
       printf("Error: その場所には置けません。\n> ");
     }
-    board[row][col] = turnFlg;
+    flip(row, col);
     turnFlg = (turnFlg == BLACK) ? WHITE : BLACK;
   }
   return 0;
