@@ -24,7 +24,7 @@ void init() {
   turnFlg = BLACK;
 }
 
-void viewBoard() {
+void dispBoard() {
   int i, j;
   printf("  ");
   for(i = 0; i < FRAME; i++) printf(" %d",i);
@@ -112,26 +112,80 @@ void flip(int row, int col) {
   }
 }
 
-int main() {
+int isAvailable() {
   int row, col;
-  init();
-
-  while(1) {
-    viewBoard();
-
-    if(turnFlg == BLACK) {
-      printf("●のターン > ");
-    } else {
-      printf("○のターン > ");
+  int cnt = 0;
+  for(row = 0; row < FRAME; row++) {
+    for(col = 0; col < FRAME; col++) {
+      if(isPutStone(row, col)) cnt++;
     }
-    while(1) {
-      scanf("%d%d",&row, &col);
-      if(isPutStone(row, col)) break;
-      printf("Error: その場所には置けません。\n> ");
-    }
-    flip(row, col);
+  }
+  if(cnt > 0) return TRUE;
+  return FALSE;
+}
+
+void input(int *row, int *col) {
+  if(!isAvailable()) {
+    printf("PASS\n");
     turnFlg = (turnFlg == BLACK) ? WHITE : BLACK;
   }
+  if(turnFlg == BLACK) {
+    printf("●のターン > ");
+  } else {
+    printf("○のターン > ");
+  }
+  while(1) {
+    scanf("%d%d",row, col);
+    if(isPutStone(*row, *col)) break;
+    printf("Error: その場所には置けません。\n> ");
+  }
+
+}
+
+int isFinish() {
+  int row, col;
+  for(row = 0; row < FRAME; row++) {
+    for(col = 0; col < FRAME; col++) {
+      if(board[row][col] == BLANK) return FALSE;
+    }
+  }
+  return TRUE;
+}
+
+void dispScore() {
+  int row, col;
+  int score_black = 0, score_white = 0;
+  for(row = 0; row < FRAME; row++) {
+    for(col = 0; col < FRAME; col++) {
+      if(board[row][col] == BLACK) {
+        score_black++;
+      } else if(board[row][col] == WHITE) {
+        score_white++;
+      }
+    }
+  }
+  if(score_black > score_white) {
+    printf("WIN: BLACK\n");
+  } else if(score_white > score_black) {
+    printf("WIN: WHITE\n");
+  } else {
+    printf("DRAW\n");
+  }
+  printf("BLACK(%d) : WHITE(%d)\n",score_black, score_white);
+}
+
+int main() {
+  int row, col;
+
+  init();
+  while(1) {
+    dispBoard();
+    input(&row, &col);
+    flip(row, col);
+    if(isFinish()) break;
+    turnFlg = (turnFlg == BLACK) ? WHITE : BLACK;
+  }
+  dispScore();
   return 0;
 }
 
